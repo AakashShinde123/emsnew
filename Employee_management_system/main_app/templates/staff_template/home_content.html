@@ -1,0 +1,152 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{ page_title }}{% endblock page_title %}
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Total Leave Applied Box -->
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-maroon">
+                    <div class="inner">
+                        <h3>{{ total_leave }}</h3>
+                        <p>Total Leave Applied</p>
+                    </div>
+                    <div class="icon">
+                        <i class="nav-icon fas fa-sign-out-alt"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Details Section -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="m-0">Employee Details</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 text-center">
+                                <!-- Profile Image -->
+                                {% if request.user.profile_pic %}
+                                    <img src="{{ request.user.profile_pic}}" class="img-fluid img-thumbnail img-square" alt="Profile Picture">
+                                {% else %}
+                                    <img src="{% static 'images/default-profile.png' %}" class="img-fluid img-thumbnail img-square" alt="Default Profile Picture">
+                                {% endif %}
+                            </div>
+                            <div class="col-md-9">
+                                <!-- Employee Information -->
+                                <h5 class="text-primary">{{ request.user.first_name }} {{ request.user.last_name }}</h5>
+                                <p><strong>Email:</strong> <span class="text-muted">{{ request.user.email }}</span></p>
+                                <p><strong>Gender:</strong> <span class="badge bg-light text-dark">{{ request.user.get_gender_display }}</span></p>
+                                <p><strong>Address:</strong> <span class="text-muted">{{ request.user.address }}</span></p>
+                                <p><strong>User Type:</strong> <span class="badge bg-success text-white">{{ request.user.get_user_type_display }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.Employee Details Section -->
+
+    </div><!-- /.container-fluid -->
+</section>
+{% endblock content %}
+
+{% block custom_js %}
+<script>
+    $(document).ready(function() {
+        var donutData = {
+            labels: ['Attendance', 'Leave'],
+            datasets: []
+        };
+        var pieChartCanvas = $('#pieChart').get(0).getContext('2d');
+        var pieData = donutData;
+        var pieOptions = {
+            maintainAspectRatio: false,
+            responsive: true
+        };
+
+        // Create pie chart
+        var pieChart = new Chart(pieChartCanvas, {
+            type: 'pie',
+            data: pieData,
+            options: pieOptions
+        });
+    });
+</script>
+
+<!-- Firebase setup (minimal version) -->
+<script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.23.0/firebase-messaging.js"></script>
+
+<script>
+    var firebaseConfig = {
+        apiKey: "AIzaSyBarDWWHTfTMSrtc5Lj3Cdw5dEvjAkFwtM",
+        authDomain: "sms-with-django.firebaseapp.com",
+        databaseURL: "https://sms-with-django.firebaseio.com",
+        projectId: "sms-with-django",
+        storageBucket: "sms-with-django.appspot.com",
+        messagingSenderId: "945324593139",
+        appId: "1:945324593139:web:03fa99a8854bbd38420c86",
+        measurementId: "G-2F2RXTL9GT"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+
+    function InitializeFireBaseMessaging() {
+        messaging
+            .requestPermission()
+            .then(function () {
+                console.log("Notification Permission");
+                return messaging.getToken();
+            })
+            .then(function (token) {
+                console.log("Token : " + token);
+                sendToServer(token);
+            })
+            .catch(function (reason) {
+                console.log(reason);
+            });
+    }
+
+    messaging.onMessage(function (payload) {
+        const notificationOption = {
+            body: payload.notification.body,
+            icon: payload.notification.icon
+        };
+        if (Notification.permission == 'granted') {
+            var notification = new Notification(payload.notification.title, notificationOption);
+            notification.onclick = function (event) {
+                event.preventDefault();
+                window.open(payload.notification.click_action, "_blank");
+                notification.close();
+            };
+        }
+        console.log(payload);
+    });
+
+    messaging.onTokenRefresh(function () {
+        messaging.getToken()
+            .then(function (newToken) {
+                console.log("New Token : " + newToken);
+                sendToServer(newToken);
+            })
+            .catch(function (reason) {
+                console.log(reason);
+            });
+    });
+
+    function sendToServer(token) {
+        $.ajax({
+            url: "{% url 'staff_fcmtoken' %}",
+            type: 'POST',
+            data: { token: token }
+        }).done(function (response) {}).fail(function (response) {});
+    }
+
+    InitializeFireBaseMessaging();
+</script>
+{% endblock custom_js %}

@@ -1,0 +1,224 @@
+{% load static %}
+<aside class="main-sidebar elevation-4" style="background-color: rgb(115, 206, 242); color: rgb(14, 186, 238);">
+
+    <!-- Embedded CSS for sidebar styles and animations -->
+    <style>
+        /* Sidebar styles */
+        .nav-link {
+            transition: background-color 0.5s ease, transform 0.5s ease;
+        }
+
+        /* Active state - animations */
+        .nav-link.active {
+            background-color: #007bff;  /* Change to your preferred active color */
+            transform: scale(1.1);       /* Slightly enlarge the active item */
+        }
+
+        /* Hover effect */
+        .nav-link:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+
+        /* Optional: Style the icon to animate when active */
+        .nav-icon {
+            transition: transform 0.2s ease;
+        }
+
+        .nav-link.active .nav-icon {
+            transform: rotate(15deg);  /* Rotate icon on active */
+        }
+    </style>
+
+
+    {% if request.user.user_type == '1' %}
+    <!-- Brand Logo -->
+    <a href="{% url 'admin_home' %}" class="brand-link">
+        <img src="{% static 'dist/img/cmsl.png' %}" alt="cmsl"
+            class="brand-image img-circle elevation-3">
+        <span class="brand-text font-weight-bold text-dark">Admin Panel</span>
+    </a>
+
+    <!-- Sidebar -->    
+    <div class="sidebar">
+        <!-- Sidebar user panel (optional) -->
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex flex-column align-items-start">
+            <div class="image">
+                <img src="{{ request.user.profile_pic}}" class="img-fluid  img-square" style="width: 80px;" alt="User Image">
+            </div>
+            <div class="info">
+                <a href="#" class="d-inlin text-dark font-weight-bold">{{user}}</a>
+            </div>
+        </div>
+
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+            <ul class="list-inline bg-sky blue sidebar"data-widget="treeview" role="menu" data-accordion="false">
+
+                <li class="nav-item mt-2">
+                    <a href="{% url 'admin_home' %}" class="nav-link {% if request.path == '/admin/' %} active {% endif %}">
+                        <i class="nav-icon fas fa-home text-dark"></i>
+                        <span class="text-dark font-weight-bold">Home</span>
+                    </a>
+                </li>
+
+                <li class="nav-item mt-3">
+                    <a href="{% url 'admin_view_profile' %}" class="nav-link {% if request.path == '/admin/view-profile/' %} active {% endif %}">
+                        <i class="nav-icon fas fa-address-card text-dark"></i>
+                        <span class="text-dark font-weight-bold">Update Profile</span>
+                    </a>
+                </li>
+
+                <li class="nav-item has-treeview mt-3">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-bookmark text-dark"></i>
+                        <span class="text-dark font-weight-bold">Department <i class="fas fa-angle-left right"></i></span>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        <li class="nav-item">
+                            <a href="{% url 'add_department' %}" class="nav-link {% if request.path == '/admin/add-department/' %} active {% endif %}">
+                                <i class="far fa-circle nav-icon text-dark"></i>
+                                <span class="text-dark font-weight-bold">Add Department</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'manage_department' %}" class="nav-link {% if request.path == '/admin/manage-department/' %} active {% endif %}">
+                                <i class="far fa-circle nav-icon text-dark"></i>
+                                <span class="text-dark font-weight-bold">Manage Department</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item mt-3">
+                    <a href="{% url 'add_staff' %}" class="nav-link {% if request.path == '/admin/add-staff/' %} active {% endif %}">
+                        <i class="nav-icon fas fa-user-plus text-dark"></i>
+                        <span class="text-dark font-weight-bold">Add Employee</span>
+                    </a>
+                </li>
+
+                <li class="nav-item mt-3">
+                    <a href="{% url 'manage_staff' %}" class="nav-link {% if request.path == '/admin/manage-staff/' %} active {% endif %}">
+                        <i class="nav-icon fas fa-th text-dark"></i>
+                        <span class="text-dark font-weight-bold">Manage Employee</span>
+                    </a>
+                </li>
+
+                <li class="nav-item mt-3">
+                    <a href="{% url 'admin_notify_staff' %}" class="nav-link {% if request.path == '/admin/notify-staff/' %} active {% endif %}">
+                        <i class="nav-icon fas fa-bullhorn text-dark"></i>
+                        <span class="text-dark font-weight-bold">Notify Employee</span>
+                    </a>
+                </li>
+
+
+                <li class="nav-item mt-3">
+                    <a href="{% url 'staff_complaint_message' %}" class="nav-link {% if request.path == '/admin/view-complaint/' %} active {% endif %}">
+                        <i class="nav-icon fas fa-comment text-dark"></i>
+                        <span class="text-dark font-weight-bold">Employee Complaints</span>
+                    </a>
+                </li>
+
+                <li class="nav-item mt-3">
+                    <a href="{% url 'view_staff_leave' %}" class="nav-link {% if request.path == '/admin/staff-leave/' %} active {% endif %}">
+                        <i class="nav-icon fas fa-check-double text-dark"></i>
+                        <span class=" text-dark font-weight-bold">Employee Leave</span>
+                    </a>
+                </li>
+                <li class="nav-item mt-3">
+                    <a href="{% url 'user_logout' %}" class="nav-link" onclick="return confirm('Your session will be terminated. Proceed?')">
+                        <i class="nav-icon fas fa-power-off text-dark"></i>
+                        <span class="text-dark font-weight-bold">Logout</span>
+                    </a>
+                </li>
+
+                {% elif request.user.user_type == '2' %}
+                <!-- Employee Panel -->
+                 
+                <a href="#" class="brand-link">
+                    <img src="{% static 'dist/img/AdminLTELogo.png' %}" alt="AdminLTE Logo"
+                        class="brand-image img-circle elevation-3" style="opacity: .8">
+                    <span class="brand-text font-weight-bold text-dark">Employee Panel</span>
+                </a>
+
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <!-- Sidebar user panel (optional) -->
+                    <div class="user-panel mt-3 pb-3 mb-3 d-flex flex-column align-items-start">
+                        <div class="image">
+                            <img src="{{ request.user.profile_pic }}" class="img-fluid  img-square" style="width: 80px;" alt="User Image">
+                        </div>
+                        <div class="info">
+                            <a href="#" class="d-inline"> <span class="brand-text  text-dark font-weight-bolder">{{ user }}</span></a>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar Menu -->
+                    <nav class="mt-4">
+                        <ul class="list-inline bg-sky blue sidebar" data-widget="treeview" role="menu" data-accordion="false">
+
+                            <li class="nav-item">
+                                <a href="{% url 'staff_home' %}" class="nav-link {% if request.path == '/staff/' %} active {% endif %}">
+                                    <i class="nav-icon fas fa-home text-dark"></i>
+                                    <span class="text-dark font-weight-bold">Home</span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item mt-4">
+                                <a href="{% url 'staff_view_profile' %}" class="nav-link {% if request.path == '/staff/view-profile/' %} active {% endif %}">
+                                    <i class="nav-icon fas fa-address-card text-dark"></i>
+                                    <span class="text-dark font-weight-bold">Update Profile</span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item mt-4">
+                                <a href="{% url 'staff_apply_leave' %}" class="nav-link {% if request.path == '/staff/apply-leave/' %} active {% endif %}">
+                                    <i class="nav-icon fas fa-check text-dark"></i>
+                                    <span class="text-dark font-weight-bold">Apply For Leave</span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item mt-4">
+                                <a href="{% url 'staff_complaint' %}" class="nav-link {% if request.path == '/staff/complaint/' %} active {% endif %}">
+                                    <i class="nav-icon fas fa-comment-alt text-dark"></i>
+                                    <span class="text-dark font-weight-bold">Complaints</span>
+                                </a>
+                            </li>
+                            <li class="nav-item mt-4">
+                                {% url 'staff_view_notification' as staff_view_notification %}
+                                <a href="{{staff_view_notification}}"
+                                    class="nav-link {% if staff_view_notification == request.path %} active {% endif %}">
+                                    <i class="nav-icon fas fa-bell text-dark"></i>
+                                    <span class="text-dark font-weight-bold">
+                                        View Notifications
+
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="nav-item mt-4">
+                                <a href="{% url 'user_logout' %}" class="nav-link" onclick="return confirm('Your session will be terminated. Proceed?')">
+                                    <i class="nav-icon fas fa-power-off text-dark"></i>
+                                    <span class="text-dark font-weight-bold">Logout</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+     <!-- Embedded JavaScript to handle active state changes -->
+     <script>
+        $(document).ready(function () {
+            // Select all nav links
+            $('.nav-link').on('click', function () {
+                // Remove 'active' class from all links
+                $('.nav-link').removeClass('active');
+                
+                // Add 'active' class to clicked link
+                $(this).addClass('active');
+            });
+        });
+    </script>
+</aside>

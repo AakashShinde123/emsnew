@@ -1,0 +1,197 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- general form elements -->
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">{{page_title}}</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Search Filter -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="input-group">
+                                    <input 
+                                        type="text" 
+                                        id="combinedFilter" 
+                                        class="form-control rounded-pill shadow-sm" 
+                                        placeholder="🔍 Search by Employee Name or Department" 
+                                        aria-label="Search by Employee Name or Department">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary rounded-pill shadow-sm" type="button">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="table">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Employee</th>
+                                        <th>Department</th>
+                                        <th>Message</th>
+                                        <th>Leave Date</th>
+                                        <th>Submitted On</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaveTable">
+                                    {% for leave in allLeave %}
+                                    <tr>
+                                        <td>{{forloop.counter}}</td>
+                                        <td class="name">{{leave.staff}}</td>
+                                        <td class="department">{{leave.staff.department}}</td>
+                                        <td>{{leave.message}}</td>
+                                        <td>{{leave.date}}</td>
+                                        <td>{{leave.created_at}}</td>
+                                        <td>
+                                            {% if leave.status == 0 %}
+                                            <button data-toggle="modal" data-target="#reply_modal" value="{{leave.id}}" class="btn btn-success reply_open_modal">Reply</button>
+                                            {% elif leave.status == -1 %}
+                                            <span class='badge badge-danger'>Rejected</span>
+                                            {% else %}
+                                            <span class='badge badge-success'>Approved</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal -->
+<div class="modal fade" id="reply_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Reply</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="id">
+                <p> Reply to <span id="reply_name"></span>'s Leave Request</p>
+                <select id="reply_leave_status" class="form-control">
+                    <option value="">-- Select --</option>
+                    <option value="1">Approve</option>
+                    <option value="-1">Reject</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button id="reply_btn" class="btn btn-success btn-block">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block custom_css %}
+<style>
+    /* Filter Bar Styling */
+    #combinedFilter {
+        font-size: 1rem;
+        padding: 0.6rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+    }
+
+    #combinedFilter::placeholder {
+        color: #6c757d;
+        opacity: 0.8;
+    }
+
+    .input-group .btn-primary {
+        background-color: #007bff;
+        border: none;
+        padding: 0.6rem 1rem;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .input-group .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .rounded-circle {
+        border: 2px solid #ddd;
+    }
+
+    .rounded-pill {
+        border-radius: 50px !important;
+    }
+
+    .shadow-sm {
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock custom_css %}
+
+{% block custom_js %}
+<script>
+    $(document).ready(function() {
+        // Reply Modal
+        $(".reply_open_modal").click(function() {
+            var id = $(this).val();
+            var name = $(this).parents("tr").children("td:eq(1)").text();
+            $("#reply_name").text(name);
+            $("#id").val(id);
+        });
+
+        // Submit Reply
+        $("#reply_btn").on("click", function() {
+            var id = $("#id").val();
+            var status = $("#reply_leave_status").val();
+            if (status == '1' || status == '-1') {
+                $.ajax({
+                    url: "{% url 'view_staff_leave' %}",
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        status: status
+                    }
+                }).done(function(response) {
+                    if (response == "True") {
+                        alert("Leave Response Has Been Saved!");
+                        location.reload();
+                    } else {
+                        alert("Reply Could Not Be Sent");
+                    }
+                }).fail(function(response) {
+                    alert("Error Occurred.");
+                });
+            } else {
+                alert("Choose a valid response");
+            }
+        });
+
+        // Combined Filter
+        $("#combinedFilter").on("keyup", function() {
+            var searchValue = $(this).val().toLowerCase();
+            $("#leaveTable tr").filter(function() {
+                var name = $(this).find(".name").text().toLowerCase();
+                var department = $(this).find(".department").text().toLowerCase();
+                $(this).toggle(name.includes(searchValue) || department.includes(searchValue));
+            });
+        });
+    });
+</script>
+{% endblock custom_js %}

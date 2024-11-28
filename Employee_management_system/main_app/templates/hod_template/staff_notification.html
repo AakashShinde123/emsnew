@@ -1,0 +1,193 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{{page_title}}</h3>
+                    </div>
+                    <!-- Combined Search Filter -->
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="input-group">
+                                    <input 
+                                        type="text" 
+                                        id="combinedFilter" 
+                                        class="form-control rounded-pill shadow-sm" 
+                                        placeholder="🔍 Search by Name or Department" 
+                                        aria-label="Search by Name or Department">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary rounded-pill shadow-sm" type="button">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Table -->
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Gender</th>
+                                    <th>Department</th>
+                                    <th>Avatar</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staffTable">
+                                {% for staff in allStaff %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td class="name">{{ staff.last_name }}, {{ staff.first_name }}</td>
+                                    <td>{{ staff.email }}</td>
+                                    <td>{{ staff.gender }}</td>
+                                    <td class="department">{{ staff.staff.department.name }}</td>
+                                    <td>
+                                        {% if staff.profile_pic == "" %}
+                                        No Image
+                                        {% else %}
+                                        <img class="img img-fluid mb-2 rounded-circle shadow-sm" height="56" width="56"
+                                             src="{{ staff.profile_pic }}" alt="">
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button 
+                                            data-toggle="modal" 
+                                            data-target="#myModal" 
+                                            class="btn btn-primary show_notification rounded-pill shadow-sm" 
+                                            value="{{ staff.id }}">
+                                            Send Notification
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send Notification</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" id="message" class="form-control" placeholder="Type your message here">
+                    <input type="hidden" id="staff_id" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                <button type="button" id="send" class="btn btn-success send_notification">Send Notification</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block custom_css %}
+<style>
+    /* Filter Bar Styling */
+    #combinedFilter {
+        font-size: 1rem;
+        padding: 0.6rem 1rem;
+        border: 1px solid #ced4da;
+    }
+
+    #combinedFilter::placeholder {
+        color: #6c757d;
+        opacity: 0.8;
+    }
+
+    .input-group .btn-primary {
+        background-color: #007bff;
+        border: none;
+        padding: 0.6rem 1rem;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .input-group .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .rounded-circle {
+        border: 2px solid #ddd;
+    }
+
+    .rounded-pill {
+        border-radius: 50px !important;
+    }
+
+    .shadow-sm {
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock custom_css %}
+
+{% block custom_js %}
+<script>
+    // Combined Search Filter
+    document.getElementById('combinedFilter').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#staffTable tr');
+        rows.forEach(row => {
+            const name = row.querySelector('.name').textContent.toLowerCase();
+            const department = row.querySelector('.department').textContent.toLowerCase();
+            if (name.includes(searchValue) || department.includes(searchValue)) {
+                row.style.display = ''; // Show row
+            } else {
+                row.style.display = 'none'; // Hide row
+            }
+        });
+    });
+
+    // Show Notification
+    $(".show_notification").click(function() {
+        $("#staff_id").val($(this).val());
+    });
+
+    // Send Notification
+    $(".send_notification").click(function() {
+        var id = $("#staff_id").val();
+        var message = $("#message").val();
+        sendNotification(id, message);
+    });
+
+    function sendNotification(id, message) {
+        $.ajax({
+            url: "{% url 'send_staff_notification' %}",
+            type: 'POST',
+            data: {
+                id: id,
+                message: message
+            }
+        }).done(function(response) {
+            if (response == 'True') {
+                alert("Notification Sent");
+                location.reload();
+            } else {
+                alert("Notification could not be saved. Please try again.");
+            }
+        }).fail(function(response) {
+            alert("Error in saving token");
+        });
+    }
+</script>
+{% endblock custom_js %}

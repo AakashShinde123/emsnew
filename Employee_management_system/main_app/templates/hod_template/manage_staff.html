@@ -1,0 +1,135 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+{% block page_title %}{{page_title}}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{{page_title}}</h3>
+                    </div>
+                    <!-- Filter Bar -->
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="input-group">
+                                    <input 
+                                        type="text" 
+                                        id="complaintFilter" 
+                                        class="form-control rounded-pill shadow-sm" 
+                                        placeholder="🔍 Search by Name or Department" 
+                                        aria-label="Search by Name or Department">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-primary rounded-pill shadow-sm" type="button">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Table -->
+                        <table id="example2" class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Sr.No</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Gender</th>
+                                    <th>Department</th>
+                                    <th>Avatar</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="complaintTable">
+                                {% for staff in allStaff %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td class="name">{{staff.last_name}}, {{staff.first_name}}</td>
+                                    <td>{{staff.email}}</td>
+                                    <td>{{staff.gender}}</td>
+                                    <td class="department">{{staff.staff.department.name}}</td>
+                                    <td>
+                                        {% if staff.profile_pic == ""  %}
+                                        No Image
+                                        {% else %}
+                                        <img class="img img-fluid mb-2 rounded-circle shadow-sm" height="56" width="56"
+                                            src="{{staff.profile_pic}}" alt="">
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'edit_staff' staff.staff.id %}" class="btn btn-info rounded-pill shadow-sm">Edit</a>
+                                        <a href="{% url 'delete_staff' staff.staff.id %}" class="btn btn-danger rounded-pill shadow-sm" onclick="return confirm('Are you sure about this ?')">Delete</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block custom_css %}
+<style>
+    /* Filter Bar Styling */
+    #complaintFilter {
+        font-size: 1rem;
+        padding: 0.6rem 1rem;
+        border: 1px solid #ced4da;
+    }
+
+    #complaintFilter::placeholder {
+        color: #6c757d;
+        opacity: 0.8;
+    }
+
+    .input-group .btn-primary {
+        background-color: #007bff;
+        border: none;
+        padding: 0.6rem 1rem;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .input-group .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .rounded-circle {
+        border: 2px solid #ddd;
+    }
+
+    .rounded-pill {
+        border-radius: 50px !important;
+    }
+
+    .shadow-sm {
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock custom_css %}
+
+{% block custom_js %}
+<script>
+    // Complaint Filter
+    document.getElementById('complaintFilter').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#complaintTable tr');
+        rows.forEach(row => {
+            const name = row.querySelector('.name').textContent.toLowerCase();
+            const department = row.querySelector('.department').textContent.toLowerCase();
+            if (name.includes(searchValue) || department.includes(searchValue)) {
+                row.style.display = ''; // Show row
+            } else {
+                row.style.display = 'none'; // Hide row
+            }
+        });
+    });
+</script>
+{% endblock custom_js %}

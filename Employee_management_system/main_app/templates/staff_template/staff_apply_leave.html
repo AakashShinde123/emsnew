@@ -1,0 +1,95 @@
+{% extends 'main_app/base.html' %}
+{% load static %}
+
+{% block page_title %}{{ page_title }}{% endblock page_title %}
+
+{% block content %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Display Total, Remaining, and Used Leaves at the Top -->
+            <div class="col-md-4">
+                <div class="card card-info">
+                    <div class="card-header">
+                        <h5 class="card-title">Total Leaves</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>{{ total_leaves }} Days</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card card-warning">
+                    <div class="card-header">
+                        <h5 class="card-title">Remaining Leaves</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>{{ remaining_leaves }} Days</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h5 class="card-title">Used Leaves</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>{{ used_leaves }} Days</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <!-- Leave Application Form -->
+                <div class="card card-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ page_title }}</h3>
+                    </div>
+                    {% include "main_app/form_template.html" with messages=messages form=form button_text="Apply For Leave" %}
+                </div>
+
+                <!-- Leave History Table -->
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title"><b>Leave History</b></h3>
+                    </div>
+                    <div class="table">
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Date</th>
+                                    <th>Message</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for leave in leave_history %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ leave.date }}</td>
+                                    <td>{{ leave.message }}</td>
+                                    <td>
+                                        {% if leave.status == 0 %}
+                                        <span class="badge badge-warning">Pending</span>
+                                        {% elif leave.status == 1 %}
+                                        <span class="badge badge-success">Accepted</span>
+                                        {% else %}
+                                        <span class="badge badge-danger">Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
