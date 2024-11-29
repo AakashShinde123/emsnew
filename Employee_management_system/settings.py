@@ -154,7 +154,7 @@ EMAIL_USE_TLS = True
 
 RECAPTCHA_PUBLIC_KEY = '6LfNcI0qAAAAADeRZxUb7iGr4132dINfDZJeusrQ'
 RECAPTCHA_PRIVATE_KEY = '6LfNcI0qAAAAAIGaZgu4bWcdcoWuQQI4Hdob4weu'
-'
+
 
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
