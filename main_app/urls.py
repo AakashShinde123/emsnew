@@ -58,8 +58,10 @@ urlpatterns = [
          hod_views.delete_department, name='delete_department'),
     path("department/edit/<int:department_id>",
          hod_views.edit_department, name='edit_department'),
-    path('delete_complaint/', hod_views.delete_complaint, name='delete_complaint'),
     
+    
+    path("reply_complaint/", hod_views.reply_complaint, name="reply_complaint"),
+    path("delete_complaint/", hod_views.delete_complaint, name="delete_complaint"),
 
 
     # Staff
