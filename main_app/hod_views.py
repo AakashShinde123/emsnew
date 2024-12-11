@@ -241,6 +241,59 @@ def staff_complaint_message(request):
         except Exception as e:
             return HttpResponse("False")
 
+@csrf_exempt
+def staff_complaint_message(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            complaint_id = data.get('id')
+            reply = data.get('reply')
+            
+            complaint = get_object_or_404(ComplaintStaff, id=complaint_id)
+            complaint.reply = reply
+            complaint.save()
+            return JsonResponse("True", safe=False)
+        except Exception as e:
+            return JsonResponse("False", safe=False)
+    else:
+        complaints = ComplaintStaff.objects.all()
+        context = {
+            'complaints': complaints,
+            'page_title': 'Employee Complaints'
+        }
+        return render(request, 'hod_template/staff_complaint_template.html', context)
+
+        
+@csrf_exempt
+def reply_complaint(request):
+    if request.method == "POST":
+        try:
+            complaint_id = request.POST.get("id")
+            reply_message = request.POST.get("reply_message")
+            complaint = ComplaintStaff.objects.get(id=complaint_id)
+            complaint.reply = reply_message
+            complaint.save()
+            return JsonResponse({"success": True, "message": "Reply sent successfully!"})
+        except ComplaintStaff.DoesNotExist:
+            return JsonResponse({"success": False, "message": "Complaint not found!"})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+    return JsonResponse({"success": False, "message": "Invalid request method!"})
+
+@csrf_exempt
+def delete_complaint(request):
+    if request.method == "POST":
+        try:
+            complaint_id = request.POST.get("id")
+            complaint = ComplaintStaff.objects.get(id=complaint_id)
+            complaint.delete()
+            return JsonResponse({"success": True, "message": "Complaint deleted successfully!"})
+        except ComplaintStaff.DoesNotExist:
+            return JsonResponse({"success": False, "message": "Complaint not found!"})
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
+    return JsonResponse({"success": False, "message": "Invalid request method!"})
+
 
 @csrf_exempt
 def view_staff_leave(request):
