@@ -64,7 +64,7 @@ def staff_complaint(request):
                 obj = form.save(commit=False)
                 obj.staff = staff
                 obj.save()
-                messages.success(request, "Feedback submitted for review")
+                messages.success(request, "complaint submitted for review")
                 return redirect(reverse('staff_complaint'))
             except Exception:
                 messages.error(request, "Could not Submit!")
